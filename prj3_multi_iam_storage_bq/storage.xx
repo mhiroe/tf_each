@@ -1,0 +1,29 @@
+# gcs for upload data
+resource "google_storage_bucket" "gcs-data-transfer" {
+  for_each = toset(["dupf-desc-data", "dupf-dh-data"])
+
+  name          = each.key
+  location      = var.region
+  storage_class = "NEARLINE"
+
+  uniform_bucket_level_access = true
+}
+
+
+resource "google_storage_bucket_iam_member" "dh-storage-member" {
+  bucket = "dupf-desc-data"
+  role   = "roles/storage.admin"
+
+  for_each = toset(
+    concat(
+      [for sa in google_service_account.sa-dh-analysts : sa.email],
+      ["dh-du-data-transfers-gcp_my@dena.jp"],
+    )
+  )
+
+  member = each.value
+  #   member = "dh-du-data-transfers-gcp_my@dena.jp" # saぬいたらこれだけになる
+
+  depends_on = [google_service_account.sa-dh-analysts]
+
+}

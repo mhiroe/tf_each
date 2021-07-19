@@ -1,0 +1,42 @@
+
+
+
+locals {
+  incremental_data_stores = ["desc", "dh", "master"]
+}
+
+# for index, l  in local.incremental_data_stores : "$ds_$index" => format("%s%02d", ds, index)
+
+# locals {
+#   incremental_data_stores = for ds in ["desc", "dh", "master"] :
+#     [for num in range(01, 03) : format("%s%02d", ds, num)]
+#   ]
+# }
+
+
+
+resource "google_bigquery_dataset" "incremnt-datasets" {
+
+  #   count = 2
+
+  for_each = {
+    for index, ds in ["desc", "dh", "master"] : "${ds}_${index}" => format("%s%02d", ds, index)
+  }
+
+  #   for_each = toset([for ds in ["desc", "dh", "master"] : format("%s%02d", ds, count.index)])
+  #   dataset_names = [for ds in ["desc", "dh", "master"] : format("%s%02d", ds, count.index)]
+
+  # {format("%s%02d",  inc-data count.index)}"
+
+  dataset_id    = each.value
+  friendly_name = each.value
+
+  #   dataset_id    = each.key
+  #   friendly_name = each.key
+  location = var.region
+}
+
+
+# # fixed-dataset
+# sys_master
+# temp

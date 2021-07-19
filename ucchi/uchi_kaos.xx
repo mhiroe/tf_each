@@ -74,3 +74,26 @@ output "kaoss" {
 #       + username = "dh-dupf-anl02"
 #     },
 # ]
+
+
+# kaos 2
+# iam_member 系のリソースは 1role 1memberでしか作れない
+# マッピング変数が必要
+
+
+
+
+resource "google_project_iam_member" "sa-dh-policy" {
+  project = var.project
+
+  for_each = {
+    for d in local.all_roles_members : "${d.username} ${d.role}" => d
+  }
+  # "username role" が keyで、 d(オブジェクト)がvalue の mapをを for_eachしてる
+
+
+  role   = each.value.role
+  member = each.value.account 
+  
+  depends_on = [google_service_account.sa]
+}
